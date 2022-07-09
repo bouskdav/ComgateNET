@@ -58,13 +58,14 @@ namespace ComgateNET.WebTest.Controllers
 
 		public async Task<IActionResult> CreatePayment()
 		{
-			BasicPaymentViewModel viewModel = new BasicPaymentViewModel()
+			BasicPaymentViewModel viewModel = new()
 			{
 				Email = "EmailPlatce@email.cz",
 				Name = "Jméno zákazníka",
 				Label = "Krátký popis platby",
 				ReferenceId = Guid.NewGuid().ToString()
 			};
+
 			return View(viewModel);
 		}
 
@@ -82,7 +83,7 @@ namespace ComgateNET.WebTest.Controllers
 
 			BaseComgatePayment payment = PaymentFactory.GetBasePayment(cents, model.ReferenceId, model.Label, PaymentMethod.ALL);
 
-			Payer customer = new Payer();
+			Payer customer = new();
 
 			customer.Contact = new Contact()
 			{
@@ -98,19 +99,22 @@ namespace ComgateNET.WebTest.Controllers
 
 		public async Task<IActionResult> Payment()
 		{
-
-			AdvancedPaymentViewModel viewModel = new AdvancedPaymentViewModel()
+			AdvancedPaymentViewModel viewModel = new()
 			{
 				Email = "EmailPlatce@email.cz",
 				Name = "Jméno zákazníka",
 				Label = "Krátký popis platby",
 				ReferenceId = Guid.NewGuid().ToString(),
-				Currencies = (Enum.GetValues(typeof(Currency)).Cast<Currency>().Select(
-					enu => new SelectListItem() { Text = enu.ToString(), Value = enu.ToString() })).ToList(),
 
-				PaymentMethods = (Enum.GetValues(typeof(PaymentMethod)).Cast<PaymentMethod>().Select(
-					enu => new SelectListItem() { Text = enu.ToString(), Value = enu.ToString() })).ToList()
+				Currencies = Enum.GetValues(typeof(Currency))
+					.Cast<Currency>()
+					.Select(enu => new SelectListItem() { Text = enu.ToString(), Value = enu.ToString() })
+					.ToList(),
 
+				PaymentMethods = Enum.GetValues(typeof(PaymentMethod))
+					.Cast<PaymentMethod>()
+					.Select(enu => new SelectListItem() { Text = enu.ToString(), Value = enu.ToString() })
+					.ToList()
 			};
 
 			// test eet value
@@ -118,10 +122,10 @@ namespace ComgateNET.WebTest.Controllers
 			viewModel.EETData = "{\"celk_trzba\": \"49500\",\"zakl_nepodl_dph\": \"0\",\"zakl_dan1\": \"4132\",\"dan1\": \"868\",\"zakl_dan2\": \"10000\",\"dan2\": \"1500\",\"zakl_dan3\": \"0\",\"dan3\": \"0\",\"cest_sluz\": \"0\",\"pouzit_zboz1\": \"33000\",\"pouzit_zboz2\": \"0\",\"pouzit_zboz3\": \"0\",\"urceno_cerp_zuct\": \"0\",\"cerp_zuct\": \"0\"}";
 
 			IComgateApi comGateAPI = ComgateApiConnector.CreateConnector(_configuration.GetValue<string>("api"))
-			.TestEnviroment()
-			.SetLang()
-			.SetMerchant(_configuration.GetValue<string>("merchantId"))
-			.SetSecret(_configuration.GetValue<string>("secret"));
+				.TestEnviroment()
+				.SetLang()
+				.SetMerchant(_configuration.GetValue<string>("merchantId"))
+				.SetSecret(_configuration.GetValue<string>("secret"));
 
 			var apiResponse = await comGateAPI.GetAvailebleMethods();
 
@@ -154,11 +158,10 @@ namespace ComgateNET.WebTest.Controllers
 			payment.EET = JsonConvert.DeserializeObject<EetData>(model.EETData);
 			payment.EetReport = true;
 
-			Payer customer = new Payer();
+			Payer customer = new();
 			customer.Contact = new Contact() { Email = model.Email, Name = model.Name };
 
 			var response = await comGateAPI.CreatePayment(payment, customer);
-
 
 			return Redirect(response.Response.RedirectUrl);
 		}
@@ -176,9 +179,7 @@ namespace ComgateNET.WebTest.Controllers
 
 			var apiResponse = await comGateAPI.GetPaymentStatus(transId);
 
-
 			return View(apiResponse);
-
 		}
 
 		public async Task<IActionResult> PaymentsList()
@@ -187,7 +188,7 @@ namespace ComgateNET.WebTest.Controllers
 
 			var directory = new DirectoryInfo(Path.Combine(_environment.ContentRootPath, "DRead"));
 			var files = directory.GetFiles("*.txt");
-			List<CreatePaymentViewModel> paymentList = new List<CreatePaymentViewModel>();
+			List<CreatePaymentViewModel> paymentList = new();
 
 			foreach (var file in files)
 			{
@@ -195,14 +196,11 @@ namespace ComgateNET.WebTest.Controllers
 			}
 
 			return View(paymentList);
-
 		}
-
 
 		private CreatePaymentViewModel ParseFile(FileInfo file)
 		{
-
-			List<KeyValuePair<string, string>> output = new List<KeyValuePair<string, string>>();
+			List<KeyValuePair<string, string>> output = new();
 
 			var lines = System.IO.File.ReadLines(file.FullName);
 
@@ -227,19 +225,21 @@ namespace ComgateNET.WebTest.Controllers
 				Amount = output.First(e => e.Key == "price").Value,
 				State = (PaymentState)Enum.Parse(typeof(PaymentState), output.First(e => e.Key == "status").Value, true),
 			};
-
 		}
 
 		public async Task<IActionResult> RefundPayment(string transId)
 		{
-			RefundPaymentViewModel model = new RefundPaymentViewModel();
-			model.TransactionId = transId;
-			model.Amount = 0;
-			model.Currencies = (Enum.GetValues(typeof(Currency)).Cast<Currency>().Select(
-			   enu => new SelectListItem() { Text = enu.ToString(), Value = enu.ToString() })).ToList();
+            RefundPaymentViewModel model = new()
+            {
+                TransactionId = transId,
+                Amount = 0,
+                Currencies = Enum.GetValues(typeof(Currency))
+					.Cast<Currency>()
+					.Select(enu => new SelectListItem() { Text = enu.ToString(), Value = enu.ToString() })
+					.ToList()
+            };
 
-			return View(model);
-
+            return View(model);
 		}
 
 		[HttpPost]
@@ -258,7 +258,6 @@ namespace ComgateNET.WebTest.Controllers
 			return View("RefundComplete", response);
 
 		}
-
 
 		public async Task<IActionResult> CancelPreAuth(string transId)
 		{
@@ -287,7 +286,6 @@ namespace ComgateNET.WebTest.Controllers
 
 		}
 
-
 		[HttpPost]
 		public async Task<IActionResult> Status()
 		{
@@ -312,11 +310,9 @@ namespace ComgateNET.WebTest.Controllers
 			return Content("code=0&message=OK", "application/x-www-form-urlencoded; charset=utf-8");
 		}
 
-
 		public async Task<IActionResult> PaymentCallback(string id, string refId)
 		{
-
-			List<KeyValuePair<string, string>> output = new List<KeyValuePair<string, string>>();
+			List<KeyValuePair<string, string>> output = new();
 
 			var lines = System.IO.File.ReadLines(Path.Combine(_environment.ContentRootPath, "DRead", refId + ".txt"));
 			foreach (var line in lines)

@@ -139,31 +139,29 @@ namespace ComgateNET.Services
 
 		public async Task<ApiResponse<GetPaymentMethodsResponse>> GetAvailebleMethods()
 		{
-			using (var httpClient = HttpClientFactory.CreateHttpClient(ComgateHttpClientType.HttpClient))
-			{
+            using var httpClient = HttpClientFactory.CreateHttpClient(ComgateHttpClientType.HttpClient);
 
-				GetPaymentMethodsRequest methodsRequest = (GetPaymentMethodsRequest)_requestBuilder
-					.CreateGetPaymentMethodsRequest()
-					.SetMerchant(this.Merchant)
-					.SetSecret(this.Secret);
+            GetPaymentMethodsRequest methodsRequest = (GetPaymentMethodsRequest)_requestBuilder
+                .CreateGetPaymentMethodsRequest()
+                .SetMerchant(this.Merchant)
+                .SetSecret(this.Secret);
 
-				var content = _serializer.Serialize<GetPaymentMethodsRequest>(methodsRequest);
+            var content = _serializer.Serialize<GetPaymentMethodsRequest>(methodsRequest);
 
-				httpClient.BaseAddress = new Uri(BaseUrl);
+            httpClient.BaseAddress = new Uri(BaseUrl);
 
-				var response = await httpClient.PostAsync("methods", content);
+            var response = await httpClient.PostAsync("methods", content);
 
-				if (response.IsSuccessStatusCode)
-				{
-					var responseContent = await response.Content.ReadAsStringAsync();
-					return _serializer.Deserialize<GetPaymentMethodsResponse>(responseContent);
-				}
-				else
-				{
-					throw new Exception("Cannot create method list");
-				}
-			}
-		}
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                return _serializer.Deserialize<GetPaymentMethodsResponse>(responseContent);
+            }
+            else
+            {
+                throw new Exception("Cannot create method list");
+            }
+        }
 
 		public async Task<ApiResponse<GetPaymentStatusResponse>> GetPaymentStatus(string transId)
 		{
@@ -233,59 +231,56 @@ namespace ComgateNET.Services
 
 		public async Task<ApiResponse<bool>> CapturePreauth(string transId)
 		{
-			using (var httpClient = HttpClientFactory.CreateHttpClient(ComgateHttpClientType.HttpClient))
-			{
-				CapturePreAuthRequest capturePreauthRequest = (CapturePreAuthRequest)new CapturePreAuthRequest()
-					.SetMerchant(this.Merchant)
-					.SetSecret(this.Secret)
-					.SetTransactionID(transId);
+            using var httpClient = HttpClientFactory.CreateHttpClient(ComgateHttpClientType.HttpClient);
 
-				var content = _serializer.Serialize<CapturePreAuthRequest>(capturePreauthRequest);
+            CapturePreAuthRequest capturePreauthRequest = (CapturePreAuthRequest)new CapturePreAuthRequest()
+                .SetMerchant(this.Merchant)
+                .SetSecret(this.Secret)
+                .SetTransactionID(transId);
 
-				httpClient.BaseAddress = new Uri(BaseUrl);
+            var content = _serializer.Serialize<CapturePreAuthRequest>(capturePreauthRequest);
 
-				var response = await httpClient.PostAsync("capturePreauth", content);
+            httpClient.BaseAddress = new Uri(BaseUrl);
 
-				if (response.IsSuccessStatusCode)
-				{
-					var responseContent = await response.Content.ReadAsStringAsync();
-					return _serializer.Deserialize<bool>(responseContent);
-				}
-				else
-				{
-					throw new Exception("Cannot create method list");
-				}
-			}
-		}
+            var response = await httpClient.PostAsync("capturePreauth", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                return _serializer.Deserialize<bool>(responseContent);
+            }
+            else
+            {
+                throw new Exception("Cannot create method list");
+            }
+        }
 
 		public async Task<ApiResponse<bool>> CancelPreauth(string transId)
 		{
+            using var httpClient = HttpClientFactory.CreateHttpClient(ComgateHttpClientType.HttpClient);
 
-			using (var httpClient = HttpClientFactory.CreateHttpClient(ComgateHttpClientType.HttpClient))
-			{
+            CancelPreAuthRequest cancelPreauthRequest = (CancelPreAuthRequest)new CancelPreAuthRequest()
+                .SetMerchant(this.Merchant)
+                .SetSecret(this.Secret)
+                .SetTransactionID(transId);
 
-				CancelPreAuthRequest cancelPreauthRequest = (CancelPreAuthRequest)new CancelPreAuthRequest()
-					.SetMerchant(this.Merchant)
-					.SetSecret(this.Secret)
-					.SetTransactionID(transId);
+            var content = _serializer.Serialize<CancelPreAuthRequest>(cancelPreauthRequest);
 
-				var content = _serializer.Serialize<CancelPreAuthRequest>(cancelPreauthRequest);
+            httpClient.BaseAddress = new Uri(BaseUrl);
 
-				httpClient.BaseAddress = new Uri(BaseUrl);
+            var response = await httpClient.PostAsync("cancelPreauth", content);
 
-				var response = await httpClient.PostAsync("cancelPreauth", content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                return _serializer.Deserialize<bool>(responseContent);
+            }
+            else
+            {
+                throw new Exception("Cannot create method list");
+            }
+        }
 
-				if (response.IsSuccessStatusCode)
-				{
-					var responseContent = await response.Content.ReadAsStringAsync();
-					return _serializer.Deserialize<bool>(responseContent);
-				}
-				else
-				{
-					throw new Exception("Cannot create method list");
-				}
-			}
-		}
 		#endregion
 	}
 }
